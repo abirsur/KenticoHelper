@@ -1,0 +1,25 @@
+Define the followings:
+----------------------------------------------------------------------------------------------
+SiteName = { your site name }
+ex. private const string _siteName = "MySite";
+
+CategoryName = { create a new global or site based category on your application and define the same name }
+ex. private const string _categoryName = "CategoryName";
+
+For the Web-Part property:
+----------------------------------------------------------------------------------------------------
+First create a property from apps then provide the exact name.
+Ex. I have created a property named "MenuType" so I used,
+ public string NavigationType
+        {
+            get
+            {
+                return DataHelper.GetNotEmpty(GetValue("MenuType"), null);
+            }
+            set
+            {
+                SetValue("MenuType", value);
+            }
+        }
+Note: Don't forget to assign values in your property when you place your webpart in any zone. or handle
+null reference.
