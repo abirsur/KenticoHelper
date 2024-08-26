@@ -1,0 +1,116 @@
+Ensure you have Angular CLI installed:
+
+====================================================================
+npm install -g @angular/cli
+Create a new Angular project:
+
+====================================================================
+ng new pdf-viewer
+cd pdf-viewer
+2. Install Required Packages
+Install ngx-extended-pdf-viewer to view PDFs:
+
+====================================================================
+npm install ngx-extended-pdf-viewer
+Install @azure/storage-blob to access Azure Blob Storage:
+
+====================================================================
+npm install @azure/storage-blob
+3. Create an Azure Blob Storage Service
+Generate a service to handle Azure Blob Storage operations:
+
+====================================================================
+ng generate service azure-blob-storage
+Implement the service:
+typescript
+====================================================================
+// src/app/azure-blob-storage.service.ts
+import { Injectable } from '@angular/core';
+import { BlobServiceClient } from '@azure/storage-blob';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AzureBlobStorageService {
+
+  constructor() {}
+
+  async getBlobUrl(connectionString: string, containerName: string, blobName: string): Promise<string> {
+    const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const blobClient = containerClient.getBlobClient(blobName);
+
+    return await blobClient.url;
+  }
+}
+4. Create PDF Viewer Component
+Generate a component for viewing PDFs:
+
+====================================================================
+ng generate component pdf-viewer
+Implement the component:
+typescript
+====================================================================
+// src/app/pdf-viewer/pdf-viewer.component.ts
+import { Component, OnInit } from '@angular/core';
+import { AzureBlobStorageService } from '../azure-blob-storage.service';
+
+@Component({
+  selector: 'app-pdf-viewer',
+  templateUrl: './pdf-viewer.component.html',
+  styleUrls: ['./pdf-viewer.component.css']
+})
+export class PdfViewerComponent implements OnInit {
+
+  pdfSrc: string = '';
+
+  constructor(private azureBlobService: AzureBlobStorageService) {}
+
+  async ngOnInit(): Promise<void> {
+    const connectionString = 'your-azure-blob-storage-connection-string';
+    const containerName = 'your-container-name';
+    const blobName = 'your-pdf-file-name.pdf';
+
+    this.pdfSrc = await this.azureBlobService.getBlobUrl(connectionString, containerName, blobName);
+  }
+}
+Update the template to include the PDF viewer:
+html
+====================================================================
+<!-- src/app/pdf-viewer/pdf-viewer.component.html -->
+<ngx-extended-pdf-viewer [src]="pdfSrc" useBrowserLocale="true"></ngx-extended-pdf-viewer>
+5. Update App Module
+Import the required modules in AppModule:
+typescript
+====================================================================
+// src/app/app.module.ts
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+import { PdfViewerComponent } from './pdf-viewer/pdf-viewer.component';
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    PdfViewerComponent
+  ],
+  imports: [
+    BrowserModule,
+    NgxExtendedPdfViewerModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+6. Use the PDF Viewer Component
+Add the PdfViewerComponent to your main application template:
+html
+====================================================================
+<!-- src/app/app.component.html -->
+<app-pdf-viewer></app-pdf-viewer>
+7. Run the Application
+Finally, start the Angular development server:
+
+====================================================================
+ng serve
