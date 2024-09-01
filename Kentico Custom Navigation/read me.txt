@@ -50,30 +50,30 @@ def merge_datasets(processed_datasets, extracted_datasets):
     }
     
     # 1. Fill from processed_datasets
-    for model in processed_datasets:
+    for entry in processed_datasets:
         for key in final_model.keys():
-            if model.get("ExtractedData", {}).get(key) and not final_model[key]:
-                final_model[key] = model["ExtractedData"].get(key)
+            if key in entry and entry[key] and not final_model[key]:
+                final_model[key] = entry[key]
     
     # 2. Fill from Email DataType in extracted_datasets
     for data in extracted_datasets:
         if data["DataType"] == "Email":
             for key in final_model.keys():
-                if data["ExtractedData"].get(key) and not final_model[key]:
-                    final_model[key] = data["ExtractedData"].get(key)
+                if key in data["ExtractedData"] and data["ExtractedData"][key] and not final_model[key]:
+                    final_model[key] = data["ExtractedData"][key]
     
     # 3. Fill from Accord DataType in extracted_datasets
     for data in extracted_datasets:
-        if data["DataType"] == "Accord":
+        if data["DataType"].startswith("Accord"):
             for key in final_model.keys():
-                if data["ExtractedData"].get(key) and not final_model[key]:
-                    final_model[key] = data["ExtractedData"].get(key)
+                if key in data["ExtractedData"] and data["ExtractedData"][key] and not final_model[key]:
+                    final_model[key] = data["ExtractedData"][key]
     
     # 4. Fill from Broker DataType in extracted_datasets
     for data in extracted_datasets:
         if data["DataType"] == "Broker":
             for key in final_model.keys():
-                if data["ExtractedData"].get(key) and not final_model[key]:
-                    final_model[key] = data["ExtractedData"].get(key)
+                if key in data["ExtractedData"] and data["ExtractedData"][key] and not final_model[key]:
+                    final_model[key] = data["ExtractedData"][key]
     
     return final_model
