@@ -23,3 +23,57 @@ Ex. I have created a property named "MenuType" so I used,
         }
 Note: Don't forget to assign values in your property when you place your webpart in any zone. or handle
 null reference.
+
+
+
+def merge_datasets(processed_datasets, extracted_datasets):
+    # Initialize the final model with blank fields
+    final_model = {
+        "Client_Name": "",
+        "Client_Address_Street": "",
+        "Client_Address_City": "",
+        "Client_Address_Zip": "",
+        "Client_Address_State": "",
+        "Client_Address_Country": "",
+        "Client_Email": "",
+        "LOB": "",
+        "Policy_no": "",
+        "Policy_effective_date": "",
+        "Policy_expiration_date": "",
+        "Broker_Name": "",
+        "Broker_Address_Street": "",
+        "Broker_Address_City": "",
+        "Broker_Address_Zip": "",
+        "Broker_Address_State": "",
+        "Broker_Address_Country": "",
+        "Broker_Email": "",
+    }
+    
+    # 1. Fill from processed_datasets
+    for model in processed_datasets:
+        for key in final_model.keys():
+            if model.get("ExtractedData", {}).get(key) and not final_model[key]:
+                final_model[key] = model["ExtractedData"].get(key)
+    
+    # 2. Fill from Email DataType in extracted_datasets
+    for data in extracted_datasets:
+        if data["DataType"] == "Email":
+            for key in final_model.keys():
+                if data["ExtractedData"].get(key) and not final_model[key]:
+                    final_model[key] = data["ExtractedData"].get(key)
+    
+    # 3. Fill from Accord DataType in extracted_datasets
+    for data in extracted_datasets:
+        if data["DataType"] == "Accord":
+            for key in final_model.keys():
+                if data["ExtractedData"].get(key) and not final_model[key]:
+                    final_model[key] = data["ExtractedData"].get(key)
+    
+    # 4. Fill from Broker DataType in extracted_datasets
+    for data in extracted_datasets:
+        if data["DataType"] == "Broker":
+            for key in final_model.keys():
+                if data["ExtractedData"].get(key) and not final_model[key]:
+                    final_model[key] = data["ExtractedData"].get(key)
+    
+    return final_model
