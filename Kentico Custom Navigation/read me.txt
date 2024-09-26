@@ -33,3 +33,32 @@
 │   ├── test_fuzzy_match_service.py
 │   ├── test_mail_service.py
 │   ├── test_post_processing_helpers.py
+--------------------------------------------------------------------------------
+Key Components
+Controllers: Manage the flow of data through the application.
+
+DataExtractionController: Handles requests for document parsing and data extraction.
+Parsers: Extract content from various document types.
+
+PDFParser: Extracts images and text from PDFs.
+MailParser: Parses email content and extracts attachments.
+Services: Provide core functionalities like GPT integration, fuzzy matching, and post-processing.
+
+GPTService: Extracts structured data using GPT models.
+FuzzyMatchService: Enhances text extraction with better synonyms.
+PostProcessingService: Processes extracted data to match a given schema.
+Helpers: Provide additional processing logic.
+
+PostProcessingHelpers: Contains helper methods for post-processing.
+Utilities: Provide common functionalities like logging.
+
+utils.py: Contains logging utilities.
+Unit Tests: Ensure the correctness of the application.
+
+tests/: Contains unit tests for controllers, services, and helpers.
+Docker Support: Containerizes the application for deployment.
+
+Dockerfile: Defines the Docker image.
+azure-pipelines.yml: Azure DevOps pipeline configuration to build and push the Docker image to ACR.
+This framework provides a robust solution for document parsing, data extraction, and post-processing, leveraging advanced technologies like GPT and fuzzy matching to enhance accuracy and efficiency.
+
