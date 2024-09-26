@@ -34,6 +34,48 @@
 │   ├── test_mail_service.py
 │   ├── test_post_processing_helpers.py
 --------------------------------------------------------------------------------
+GitHub Copilot
+Yes, the framework includes exception handling and a parser factory to manage different types of document parsers. Let's summarize these features as well.
+
+Exception Handling
+The framework includes exception handling to ensure that errors are logged and managed appropriately. This is evident in the various services and controllers where exceptions are caught and logged.
+
+Parser Factory
+The DocumentParserFactory is used to manage different types of document parsers. This allows the framework to support multiple document types and select the appropriate parser based on the file type.
+
+Updated Features Summary
+Document Parsing:
+
+PDF Parsing: Extracts images and text from PDF documents.
+Mail Parsing: Parses email content and extracts attachments.
+Document Parsing Factory: Supports multiple document types through a factory pattern.
+Data Extraction:
+
+GPT Integration: Uses GPT models to extract structured data from parsed content.
+GPT Vision: Extracts text from images using GPT Vision.
+Fuzzy Matching: Enhances text extraction by finding better synonyms using text-embedding models.
+Post-Processing:
+
+Data Processing: Processes extracted data to match a given schema.
+Fuzzy Matching in Post-Processing: Applies fuzzy matching during post-processing to refine extracted data.
+Additional GPT Extraction: Performs additional data extraction using GPT during post-processing.
+Singleton Services:
+
+Service Pattern: Uses singleton pattern for services like GPT, Fuzzy Match, Mail, and Post-Processing to ensure a single instance is used throughout the application.
+Logging:
+
+Logging Utility: Provides logging for various stages of document parsing, data extraction, and post-processing.
+Exception Handling:
+
+Error Management: Catches and logs exceptions to ensure errors are managed appropriately.
+Unit Testing:
+
+Comprehensive Tests: Includes unit tests for controllers, services, and helpers to ensure all methods work correctly.
+Docker Support:
+
+Dockerfile: Provides a Dockerfile to containerize the application.
+Azure DevOps Pipeline: Includes a pipeline configuration to build the Docker image and push it to Azure Container Registry (ACR).
+Project Structure
 Key Components
 Controllers: Manage the flow of data through the application.
 
@@ -42,6 +84,7 @@ Parsers: Extract content from various document types.
 
 PDFParser: Extracts images and text from PDFs.
 MailParser: Parses email content and extracts attachments.
+DocumentParserFactory: Factory pattern to select the appropriate parser based on file type.
 Services: Provide core functionalities like GPT integration, fuzzy matching, and post-processing.
 
 GPTService: Extracts structured data using GPT models.
@@ -53,6 +96,9 @@ PostProcessingHelpers: Contains helper methods for post-processing.
 Utilities: Provide common functionalities like logging.
 
 utils.py: Contains logging utilities.
+Exception Handling: Ensures errors are managed appropriately.
+
+Exception handling is implemented in various services and controllers to catch and log errors.
 Unit Tests: Ensure the correctness of the application.
 
 tests/: Contains unit tests for controllers, services, and helpers.
@@ -61,4 +107,3 @@ Docker Support: Containerizes the application for deployment.
 Dockerfile: Defines the Docker image.
 azure-pipelines.yml: Azure DevOps pipeline configuration to build and push the Docker image to ACR.
 This framework provides a robust solution for document parsing, data extraction, and post-processing, leveraging advanced technologies like GPT and fuzzy matching to enhance accuracy and efficiency.
-
