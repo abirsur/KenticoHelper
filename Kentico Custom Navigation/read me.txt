@@ -1,228 +1,35 @@
-Define the followings:
-----------------------------------------------------------------------------------------------
-SiteName = { your site name }
-ex. private const string _siteName = "MySite";
-
-CategoryName = { create a new global or site based category on your application and define the same name }
-ex. private const string _categoryName = "CategoryName";
-
-For the Web-Part property:
-----------------------------------------------------------------------------------------------------
-First create a property from apps then provide the exact name.
-Ex. I have created a property named "MenuType" so I used,
- public string NavigationType
-        {
-            get
-            {
-                return DataHelper.GetNotEmpty(GetValue("MenuType"), null);
-            }
-            set
-            {
-                SetValue("MenuType", value);
-            }
-        }
-Note: Don't forget to assign values in your property when you place your webpart in any zone. or handle
-null reference.
-
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-import difflib
-
-def perform_operation(data_set, config):
-    result = {}
-    
-    for field in config:
-        field_name = field['FieldName']
-        dependency = field['Dependency']
-        source_priority = sorted(field['SourcePriority'], key=lambda x: x['Priority'])
-        operations_priority = sorted(field['OperationsPriority'], key=lambda x: x['priority'])
-        match_with = field.get('Match_with', "")
-        
-        # Process field based on dependency
-        if not dependency:
-            field_result = process_field_without_dependency(
-                data_set, source_priority, operations_priority, field_name, match_with
-            )
-        else:
-            field_result = process_field_with_dependency(
-                data_set, source_priority, operations_priority, field_name, dependency, match_with
-            )
-        
-        result[field_name] = field_result['Value']
-    
-    return result
-
-def process_field_without_dependency(data_set, source_priority, operations_priority, field_name, match_with):
-    best_match = ""
-    best_source = ""
-    best_source_priority = float('inf')
-    
-    for source in source_priority:
-        source_name = source['Source']
-        source_priority_value = source['Priority']
-        
-        # Extract data from the current source
-        extracted_data = extract_data_from_source(data_set, source_name, field_name)
-        
-        if extracted_data:
-            # Apply operations based on priority
-            current_best = extracted_data
-            for operation in operations_priority:
-                if operation['Operation'] == 'Fuzzy_Match' and match_with:
-                    match_data = extract_data_from_source(data_set, source_name, match_with)
-                    if match_data:
-                        fuzzy_result = perform_fuzzy_match(current_best, match_data)
-                        if fuzzy_result:
-                            current_best = fuzzy_result
-                elif operation['Operation'] == 'Identify_Comprehensive_String':
-                    comprehensive_string = identify_comprehensive_string(current_best, data_set, field_name)
-                    if comprehensive_string:
-                        current_best = comprehensive_string
-            
-            # Check the dataset from which the best data originated
-            if current_best and source_priority_value < best_source_priority:
-                best_match = current_best
-                best_source = source_name
-                best_source_priority = source_priority_value
-
-    return {"Value": best_match, "Source": best_source}
-
-def process_field_with_dependency(data_set, source_priority, operations_priority, field_name, dependency, match_with):
-    best_match = ""
-    best_source = ""
-    best_source_priority = float('inf')
-    
-    for source in source_priority:
-        source_name = source['Source']
-        source_priority_value = source['Priority']
-        
-        # Extract data based on dependency
-        dependent_data = extract_data_from_source(data_set, source_name, dependency)
-        
-        if dependent_data:
-            field_data = extract_data_from_source(data_set, source_name, field_name)
-
-            if match_with:
-                match_data = extract_data_from_source(data_set, source_name, match_with)
-                if match_data:
-                    fuzzy_result = perform_fuzzy_match(dependent_data, match_data)
-                    if fuzzy_result:
-                        field_data = fuzzy_result
-            
-            # Apply operations based on priority
-            current_best = field_data
-            for operation in operations_priority:
-                if operation['Operation'] == 'Fuzzy_Match' and match_with:
-                    match_data = extract_data_from_source(data_set, source_name, match_with)
-                    if match_data:
-                        fuzzy_result = perform_fuzzy_match(current_best, match_data)
-                        if fuzzy_result:
-                            current_best = fuzzy_result
-                elif operation['Operation'] == 'Identify_Comprehensive_String':
-                    comprehensive_string = identify_comprehensive_string(current_best, data_set, field_name)
-                    if comprehensive_string:
-                        current_best = comprehensive_string
-
-            # Check the dataset from which the best data originated
-            if current_best and source_priority_value < best_source_priority:
-                best_match = current_best
-                best_source = source_name
-                best_source_priority = source_priority_value
-
-    return {"Value": best_match, "Source": best_source}
-
-def extract_data_from_source(data_set, source_name, field_name):
-    for data in data_set:
-        if data['Source'] == source_name:
-            return data['Extracted_Data'].get(field_name, "")
-    return ""
-
-def perform_fuzzy_match(data1, data2):
-    ratio = difflib.SequenceMatcher(None, data1, data2).ratio()
-    if ratio > 0.8:  # Assuming 80% match is sufficient
-        return data1 if len(data1) > len(data2) else data2
-    return None
-
-def identify_comprehensive_string(data, data_set, field_name):
-    comprehensive_string = data
-    for item in data_set:
-        compare_string = item['Extracted_Data'].get(field_name, "")
-        if compare_string and len(compare_string) > len(comprehensive_string):
-            comprehensive_string = compare_string
-    return comprehensive_string
-
-# Example usage
-data_set = [
-    {'Source': 'Email', 'Extracted_Data': {
-        "Client_Name": "Amit",
-        "Client_Billing_Street": "125 LM Street",
-        "Client_Billing_City": "Kolkata",
-        "Client_Billing_Zip": "12345",
-        "Client_Billing_State": "WB",
-        "Client_Billing_Email_Address": "Amit@goal.com"
-    }},
-    {'Source': 'Acord', 'Extracted_Data': {
-        "Client_Name": "Amit Das",
-        "Client_Billing_Street": "125 LM St.",
-        "Client_Billing_City": "Kol",
-        "Client_Billing_Zip": "12345",
-        "Client_Billing_State": "WB",
-        "Client_Billing_Email_Address": "Don@kyc.com"
-    }},
-    {'Source': 'Broker', 'Extracted_Data': {
-        "Client_Name": "A Das",
-        "Client_Billing_Street": "125 LM St.",
-        "Client_Billing_City": "",
-        "Client_Billing_Zip": "",
-        "Client_Billing_State": "WB",
-        "Client_Billing_Email_Address": "Dan@itc.com"
-    }}
-]
-
-config = [
-    {
-        "FieldName": "Client_Name",
-        "Group": "Client_Billing",
-        "Dependency": "",
-        "SourcePriority": [{"Source": "Email", "Priority": 1}, {"Source": "Acord", "Priority": 2}, {"Source": "Broker", "Priority": 3}],
-        "OperationsPriority": [{"Operation": "Fuzzy_Match", "priority": 1}, {"Operation": "Identify_Comprehensive_String", "priority": 2}],
-        "Match_with": "Client_Billing_Email_Address"
-    },
-    {
-        "FieldName": "Client_Billing_Email_Address",
-        "Group": "Client_Billing",
-        "Dependency": "Client_Name",
-        "SourcePriority": [{"Source": "Email", "Priority": 1}, {"Source": "Acord", "Priority": 2}, {"Source": "Broker", "Priority": 3}],
-        "OperationsPriority": [{"Operation": "Fuzzy_Match", "priority": 1}, {"Operation": "Identify_Comprehensive_String", "priority": 2}],
-        "Match_with": "Client_Name"
-    },
-    {
-        "FieldName": "Client_Billing_Street",
-        "Group": "Client_Billing",
-        "Dependency": "Client_Name",
-        "SourcePriority": [{"Source": "Email", "Priority": 1}, {"Source": "Acord", "Priority": 2}, {"Source": "Broker", "Priority": 3}],
-        "OperationsPriority": [{"Operation": "Fuzzy_Match", "priority": 1}, {"Operation": "Identify_Comprehensive_String", "priority": 2}],
-        "Match_with": ""
-    },
-    {
-        "FieldName": "Client_Billing_City",
-        "Group": "Client_Billing",
-        "Dependency": "Client_Name",
-        "SourcePriority": [{"Source": "Email", "Priority": 1}, {"Source": "Acord", "Priority": 2}, {"Source": "Broker", "Priority": 3}],
-        "OperationsPriority": [{"Operation": "Fuzzy_Match", "priority": 1}, {"Operation": "Identify_Comprehensive_String", "priority": 2}],
-        "Match_with": ""
-    },
-    {
-        "FieldName": "Client_Billing_State",
-        "Group": "Client_Billing",
-        "Dependency": "Client_Name",
-        "SourcePriority": [{"Source": "Email", "Priority": 1}, {"Source": "Acord", "Priority": 2}, {"Source": "Broker", "Priority": 3}],
-        "OperationsPriority": [{"Operation": "Fuzzy_Match", "priority": 1}, {"Operation": "Identify_Comprehensive_String", "priority": 2}],
-        "Match_with": ""
-    }
-]
-
-# Execute the operation
-result = perform_operation(data_set, config)
-print(result)
+.
+├── Dockerfile
+├── requirements.txt
+├── app
+│   ├── __init__.py
+│   ├── main.py
+│   ├── models.py
+│   ├── parsers
+│   │   ├── __init__.py
+│   │   ├── base_parser.py
+│   │   ├── document_parser.py
+│   │   ├── mail_parser.py
+│   │   ├── pdf_parser.py
+│   ├── controllers
+│   │   ├── __init__.py
+│   │   ├── data_extraction_controller.py
+│   ├── services
+│   │   ├── __init__.py
+│   │   ├── gpt_service.py
+│   │   ├── post_processing_service.py
+│   │   ├── mail_service.py
+│   │   ├── fuzzy_match_service.py
+│   │   ├── gpt_vision_service.py
+│   ├── helpers
+│   │   ├── __init__.py
+│   │   ├── post_processing_helpers.py
+│   └── utils.py
+├── tests
+│   ├── __init__.py
+│   ├── test_data_extraction_controller.py
+│   ├── test_post_processing_service.py
+│   ├── test_gpt_service.py
+│   ├── test_fuzzy_match_service.py
+│   ├── test_mail_service.py
+│   ├── test_post_processing_helpers.py
