@@ -1,52 +1,46 @@
 import json
-from fuzzywuzzy import fuzz, process
-import pandas as pd
+from fuzzywuzzy import fuzz
 
-# Sample lookup data
+# Load data from JSON file
+with open('extracted_data.json', 'r') as file:
+    data = json.load(file)
 
-excel_file_path = 'book1.xlsx'
-df = pd.read_excel(excel_file_path)
-# Mapping of Excel fields to JSON fields
-field_mapping = {
-    "SortProducer Name": "Producer_Name",
-    "SortProducerOne ID": "Producer_One_Id",
-    "SortBilling Street": "Producer_Billing_Street",
-    "SortBilling City": "Producer_Billing_City",
-    "SortBilling State/Province(US & Canada)": "Producer_Billing_State",
-    "SortBilling Country": "Producer_Billing_Country",
-    "SortBilling Zip/Postal Code": "Producer_Billing_Zip_Postal_Code"
+# Filter data
+filtered_data = [entry for entry in data if entry['type'].startswith('Acord') or entry['type'].startswith('Applied')]
+
+# Separate into Client and Broker groups
+client_data = [entry for entry in filtered_data if 'Client_Name' in entry['extracted_data']]
+broker_data = [entry for entry in filtered_data if 'Broker_Agency_Name' in entry['extracted_data']]
+
+# Function to perform fuzzy matching and fill missing data
+def fuzzy_fill(data_list, key):
+    for entry in data_list:
+        if not entry['extracted_data'].get(key):
+            best_match = None
+            highest_score = 0
+            for other_entry in data_list:
+                if other_entry != entry and other_entry['extracted_data'].get(key):
+                    score = fuzz.ratio(entry['extracted_data'].get(key, ''), other_entry['extracted_data'].get(key, ''))
+                    if score > highest_score:
+                        highest_score = score
+                        best_match = other_entry
+            if best_match:
+                entry['extracted_data'][key] = best_match['extracted_data'][key]
+
+# Perform fuzzy matching and fill missing data for non-client and non-broker data
+for entry in filtered_data:
+    if 'Client_Name' not in entry['extracted_data'] and 'Broker_Agency_Name' not in entry['extracted_data']:
+        for key in entry['extracted_data']:
+            fuzzy_fill(filtered_data, key)
+
+# Prioritize Acord 125 if no matches are found
+best_client_match = next((entry for entry in client_data if entry['type'] == 'Acord 125'), None)
+best_broker_match = next((entry for entry in broker_data if entry['type'] == 'Acord 125'), None)
+
+# Output the source of data with most valid data
+output = {
+    "best_client_match": best_client_match,
+    "best_broker_match": best_broker_match
 }
 
-# Convert DataFrame to list of dictionaries and map fields
-lookup_data = df.rename(columns=field_mapping).to_dict(orient='records')
-    
-
-def fuzzy_match(input_obj, lookup_data):
-    best_match = None
-    highest_score = 0
-    
-    for item in lookup_data:
-        score = 0
-        for key in input_obj:
-            if input_obj[key] and item[key]:
-                score += fuzz.ratio(input_obj[key], item[key])
-        
-        if score > highest_score:
-            highest_score = score
-            best_match = item
-    
-    return best_match
-
-# Example input object
-input_obj = {
-    "Producer_Name": "Producer A",
-    "Producer_Billing_Street": "123 Main Street, ste200",
-    "Producer_Billing_City": "",
-    "Producer_Billing_State": "",
-    "Producer_Billing_Country": "USA",
-    "Producer_Billing_Zip_Postal_Code": ""
-}
-
-# Perform fuzzy match
-best_match = fuzzy_match(input_obj, lookup_data)
-print(json.dumps(best_match, indent=4))
+print(json.dumps(output, indent=4))
