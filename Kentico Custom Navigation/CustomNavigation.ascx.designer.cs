@@ -22,3 +22,64 @@ namespace CMSApp.CMSWebParts.Custom {
         protected global::System.Web.UI.WebControls.Repeater repeaterNavigation;
     }
 }
+
+
+Stakeholder		Interest	Influence
+Customer		High		High
+Insurance Agent	High		High
+Underwriter		High		High
+Claims Adjuster	Low			High
+Actuary			Low			High
+Regulator		High		High
+Reinsurer		Low			Low
+IT Department	Low			Low
+Marketing Team	High		Low
+Sales Team		High		Low
+Legal Team		Low			High
+Finance Team	Low			High
+Policyholder	High		Low
+Competitors		Low			Low
+Investors		High		High
+
+
+
+High Interest, High Influence:
+- Customer
+- Insurance Agent
+- Underwriter
+- Regulator
+- Investors
+
+High Interest, Low Influence:
+- Marketing Team
+- Sales Team
+- Policyholder
+
+Low Interest, High Influence:
+- Claims Adjuster
+- Actuary
+- Legal Team
+- Finance Team
+
+Low Interest, Low Influence:
+- Reinsurer
+- IT Department
+- Competitors
+
+
+
+
+                Influence
+                Low       High
+Interest  +------------------------+
+  High     | Marketing  | Customer  |
+           | Sales      | Agent     |
+           | Policyholder| Underwriter|
+           |            | Regulator |
+           |            | Investors |
+           +------------------------+
+  Low      | Reinsurer  | Claims    |
+           | IT Dept    | Actuary   |
+           | Competitors| Legal     |
+           |            | Finance   |
+           +------------------------+
