@@ -63,3 +63,41 @@ output_file = "formatted_dataset.json"
 with open(output_file, mode='w', encoding='utf-8') as json_file:
     json.dump(formatted_dataset, json_file, indent=4)
     print(f"Formatted dataset saved to {output_file}")
+
+
+-------------------------------------------
+
+import csv
+import json
+
+def convert_csv_to_json(csv_file_path, output_json_path):
+    formatted_data = []
+    with open(csv_file_path, mode="r", encoding="utf-8") as csv_file:
+        reader = csv.DictReader(csv_file)
+        for row in reader:
+            dialogue = [
+                {
+                    "from": "human",
+                    "value": f"<image>{row['prompt']}",
+                },
+                {
+                    "from": "gpt",
+                    "value": row["response"],
+                },
+            ]
+            formatted_data.append({
+                "dialogue": dialogue,
+                "image_path": row["image_path"],
+            })
+    
+    with open(output_json_path, "w", encoding="utf-8") as json_file:
+        json.dump(formatted_data, json_file, indent=4)
+    return output_json_path
+
+# Example usage
+csv_file_path = "/mnt/data/sample_data.csv"  # Replace with your CSV file path
+output_json_path = "/mnt/data/my_data_from_csv.json"
+
+result_json_path = convert_csv_to_json(csv_file_path, output_json_path)
+result_json_path
+
