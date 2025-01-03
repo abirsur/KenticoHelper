@@ -1,3 +1,93 @@
+
+
+from datasets import Dataset
+from PIL import Image
+import json
+import os
+
+# Define the formatting function
+def format_data(sample):
+    return {
+        "messages": [
+            {
+                "role": "system",
+                "content": [
+                    {"type": "text", "text": "Please review the provided image and description."},
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": sample["prompt"],
+                    },
+                    {
+                        "type": "image",
+                        "image": sample["image"],
+                    },
+                ],
+            },
+            {
+                "role": "assistant",
+                "content": [
+                    {"type": "text", "text": sample["response"]},
+                ],
+            },
+        ],
+    }
+
+# Process and format data
+def process_data(file_path):
+    data = []
+    with open(file_path, mode='r', encoding='utf-8') as csv_file:
+        for row in csv.DictReader(csv_file):
+            try:
+                # Verify image exists
+                image_path = row["image_path"]
+                if not os.path.exists(image_path):
+                    raise FileNotFoundError(f"Image not found: {image_path}")
+                
+                # Load and encode the image
+                image = Image.open(image_path)
+                
+                # Prepare sample
+                sample = {
+                    "prompt": row["prompt"],
+                    "image": image,
+                    "response": row["response"],
+                }
+                
+                # Format the data
+                formatted_row = format_data(sample)
+                data.append(formatted_row)
+            except Exception as e:
+                print(f"Error processing row {row['sl_no']}: {e}")
+    return data
+
+# Convert processed data into a Hugging Face Dataset
+def create_dataset(data):
+    dataset = Dataset.from_dict(
+        {
+            "messages": [entry["messages"] for entry in data]
+        }
+    )
+    return dataset
+
+# Main script
+csv_file_path = "your_dataset.csv"  # Replace with your CSV file path
+output_file_path = "formatted_dataset"
+
+# Process the data
+processed_data = process_data(csv_file_path)
+
+# Create and save the dataset
+dataset = create_dataset(processed_data)
+dataset.save_to_disk(output_file_path)
+
+print(f"Formatted dataset saved to {output_file_path}")
+
+---------------
 import csv
 from PIL import Image
 import json
